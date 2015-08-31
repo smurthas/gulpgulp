@@ -59,6 +59,15 @@ function doAuth(callback) {
   });
 }
 
+function readAuthFromEnv() {
+  if (process.env.FITBIT_OAUTH_TOKEN && process.env.FITBIT_OAUTH_TOKEN_SECRET) {
+    return {
+      oauth_token: process.env.FITBIT_OAUTH_TOKEN,
+      oauth_token_secret: process.env.FITBIT_OAUTH_TOKEN_SECRET,
+    };
+  }
+}
+
 function readAuthFromFile(callback) {
   fs.readFile(AUTH_FILE, function(err, data) {
     if (err) {
@@ -82,6 +91,12 @@ function writeAuthToFile(auth, callback) {
 function getAuth(callback) {
   readAuthFromFile(function(err, auth) {
     if (!err && auth) {
+      return callback(null, auth);
+    }
+
+    auth = readAuthFromEnv();
+
+    if (auth && auth.oauth_token) {
       return callback(null, auth);
     }
 
