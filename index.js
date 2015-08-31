@@ -182,18 +182,8 @@ app.post('/log/:amount', function(req, res) {
   }
 
   date = year + '-' + month + '-' + day;
-  console.log('Logging water for date:', date);
-  logWater(req.params.amount, date, function(err, logBody) {
-    if (err || !logBody) {
-      console.error('got err while logging water:', err);
-      console.error('body from log error:', logBody);
-      // send error back
-      return res.status(500).json({
-        err: err,
-        body: logBody
-      });
-    }
 
+  function doGetWater() {
     getWater(date, function(err, getBody) {
       if (err || !getBody) {
         console.error('got err while getting water:', err);
@@ -209,7 +199,28 @@ app.post('/log/:amount', function(req, res) {
       console.log('replying with:', msg);
       res.status(200).send(msg);
     });
-  });
+  }
+
+  if (process.env.LOG_WATER) {
+    console.log('Logging water for date:', date);
+    logWater(req.params.amount, date, function(err, logBody) {
+      if (err || !logBody) {
+        console.error('got err while logging water:', err);
+        console.error('body from log error:', logBody);
+        // send error back
+        return res.status(500).json({
+          err: err,
+          body: logBody
+        });
+      }
+
+      doGetWater();
+    });
+  } else {
+    console.log('Just getting water for date:', date);
+    doGetWater();
+  }
+
 });
 
 var server = app.listen(process.env.PORT || 3000, function () {
