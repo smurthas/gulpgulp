@@ -2,6 +2,7 @@
 
 var qs = require('querystring');
 var fs = require('fs');
+var moment = require('moment-timezone');
 
 var express = require('express');
 
@@ -169,19 +170,7 @@ app.get('/', function (req, res) {
 });
 
 app.post('/log/:amount', function(req, res) {
-  var date = new Date();
-  var year = date.getYear() + 1900;
-  var month = date.getMonth() + 1;
-  var day = date.getDate();
-
-  if (month < 10) {
-    month = '0' + month;
-  }
-  if (day  < 10) {
-    day = '0' + day;
-  }
-
-  date = year + '-' + month + '-' + day;
+  var date = moment().tz('America/Los_Angeles').format('YYYY-MM-DD');
 
   function doGetWater() {
     getWater(date, function(err, getBody) {
